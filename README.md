@@ -4,21 +4,58 @@ image:https://img.shields.io/badge/vert.x-3.8.1-purple.svg[link="https://vertx.i
 
 This application was generated using http://start.vertx.io
 
-== Building
+== 用vertx做spring boot项目的 router ， 摒弃掉servlet
 
-To launch your tests:
+重用 spring web 的 controller, requestMapping 和 requestParam等， 减少移植的代码量
 ```
-./mvnw clean test
+@RestController ， @Controller ， @RequestMapping  ， @RequestParam， @RequestBody
+```
+== 开始
+
+```
+    <dependency>
+			<groupId>com.zzy</groupId>
+			<artifactId>vertx-spring-boot-starter</artifactId>
+			<version>1.0.3-SNAPSHOT</version>
+		</dependency>
 ```
 
-To package your application:
+Controller demo
 ```
-./mvnw clean package
+@RestController
+@RequestMapping("/test")
+public class Tes1tController {
+}
 ```
 
-To run your application:
+param demo
 ```
-./mvnw clean compile exec:java
+    @RequestMapping(value = "/test3/:id", method = RequestMethod.PUT)
+    public Map post(@RequestParam(value = "id") int id,
+                    @RequestParam(value = "qq", required = false, defaultValue = "333") int qq,
+                    @RequestBody() Map map) {
+                    }
+```
+```
+ @RequestMapping(value = "/test4", method = RequestMethod.GET)
+    public Map post4(RoutingContext context) {
+    }
+```
+Interceptor demo
+```
+@Component
+public class Interceptor implements VertxHandlerInterceptor {
+  @Override
+  public boolean preHandle(RoutingContext context, Object handler) throws Exception {
+    HandlerMethod handlerMethod = (HandlerMethod) handler;
+    if(handlerMethod.getMethod().isAnnotationPresent(ResponseBody.class)){
+      context.response().end("not support responsebody");
+      return false;
+    }
+    return true;
+  }
+}
+
 ```
 
 == Help

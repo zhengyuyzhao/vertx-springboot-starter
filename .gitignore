@@ -184,6 +184,6 @@ nbdist/
 !.vscode/launch.json
 !.vscode/extensions.json
 
-.idea/
-.mvn/
+.idea/*
+.mvn/*
 

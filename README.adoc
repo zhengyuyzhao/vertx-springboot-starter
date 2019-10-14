@@ -13,19 +13,19 @@ This application was generated using http://start.vertx.io
 == 开始
 
 ```
-    		<dependency>
-    			<groupId>com.github.zhengyuyzhao</groupId>
-    			<artifactId>vertx-spring-boot-starter</artifactId>
-    			<version>1.0.4</version>
-    		</dependency>
+   <dependency>
+    	<groupId>com.github.zhengyuyzhao</groupId>
+    	<artifactId>vertx-spring-boot-starter</artifactId>
+    	<version>1.0.4</version>
+   </dependency>
 ```
 
 Controller demo
 ```
-@RestController
-@RequestMapping("/test")
-public class Tes1tController {
-}
+    @RestController
+    @RequestMapping("/test")
+    public class Tes1tController {
+    }
 ```
 
 param demo
@@ -37,24 +37,24 @@ param demo
                     }
 ```
 ```
- @RequestMapping(value = "/test4", method = RequestMethod.GET)
-    public Map post4(RoutingContext context) {
+    @RequestMapping(value = "/test4", method = RequestMethod.GET)
+        public Map post4(RoutingContext context) {
     }
 ```
 Interceptor demo
 ```
 @Component
-public class Interceptor implements VertxHandlerInterceptor {
-  @Override
-  public boolean preHandle(RoutingContext context, Object handler) throws Exception {
-    HandlerMethod handlerMethod = (HandlerMethod) handler;
-    if(handlerMethod.getMethod().isAnnotationPresent(ResponseBody.class)){
-      context.response().end("not support responsebody");
-      return false;
+    public class Interceptor implements VertxHandlerInterceptor {
+      @Override
+      public boolean preHandle(RoutingContext context, Object handler) throws Exception {
+        HandlerMethod handlerMethod = (HandlerMethod) handler;
+        if(handlerMethod.getMethod().isAnnotationPresent(ResponseBody.class)){
+          context.response().end("not support responsebody");
+          return false;
+        }
+        return true;
+      }
     }
-    return true;
-  }
-}
 
 ```
 
@@ -72,11 +72,25 @@ sync demo
 
 async demo
 ```
-        @AsyncHandler
-        @RequestMapping(value = "/test5", method = RequestMethod.GET)
-        public void post5(RoutingContext context, String id) {
-            mongoService.getMusics(context);
+    @AsyncHandler
+    @RequestMapping(value = "/test5", method = RequestMethod.GET)
+    public void post5(RoutingContext context, String id) {
+        mongoService.getMusics(context);
+    }
+
+```
+
+router 自定义 配置
+```
+    @Component
+    public class RouterConfig implements VertxRouterAware {
+        @Override
+        public void setRouter(Router router) {
+            router.route("/error").handler(ctx->{
+                ctx.response().end("error");
+            });
         }
+    }
 
 ```
 

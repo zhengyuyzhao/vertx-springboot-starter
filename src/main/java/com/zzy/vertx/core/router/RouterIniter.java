@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -28,10 +30,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-public class RouterIniter implements BeanPostProcessor {
+public class RouterIniter implements BeanPostProcessor , ApplicationContextAware {
   private static final Logger logger = LoggerFactory.getLogger(RouterIniter.class);
   public static final String DEFAULT_PRODUCT = "application/json;charset=UTF-8";
   private Router router;
+  private ApplicationContext applicationContext;
   @Autowired
   private VertxHandlerInterceptorManager interceptorManager;
 
@@ -40,10 +43,10 @@ public class RouterIniter implements BeanPostProcessor {
   }
 
   @Override
-  public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+  public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
     Class cla = bean.getClass();
     String baseUrl = "";
-    if (cla.isAnnotationPresent(Controller.class) || cla.isAnnotationPresent(RestController.class)) {
+    if (cla.isAnnotationPresent(Controller.class) || cla.isAnnotationPresent(RestController.class)){
       if (cla.isAnnotationPresent(RequestMapping.class)) {
         baseUrl = ((RequestMapping) cla.getAnnotation(RequestMapping.class)).value()[0];
         baseUrl = StringUtils.isEmpty(baseUrl) ? "" : baseUrl;
@@ -62,6 +65,9 @@ public class RouterIniter implements BeanPostProcessor {
           String path = baseUrl + (pathLength > 0 ? mappingInfo.path()[0] : "");
           path = formatSpringPath(path);
           logger.info("---------path---{}", path);
+          if(!checkPath(path)){
+            continue;
+          }
           Handler<RoutingContext> handler;
           boolean async = false;
           if (method.isAnnotationPresent(AsyncHandler.class)) {
@@ -86,12 +92,20 @@ public class RouterIniter implements BeanPostProcessor {
               route.blockingHandler(handler);
             }
           } catch (Exception e) {
+            e.printStackTrace();
             logger.error("------router error----{}", e.getMessage());
           }
         }
       }
     }
     return bean;
+  }
+
+  private boolean checkPath(String path){
+    if(StringUtils.isEmpty(path) || !path.startsWith("/") || path.contains("$")){
+      return false;
+    }
+    return true;
   }
 
   private String formatSpringPath(String path) {
@@ -275,4 +289,8 @@ public class RouterIniter implements BeanPostProcessor {
   }
 
 
+  @Override
+  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+    this.applicationContext = applicationContext;
+  }
 }

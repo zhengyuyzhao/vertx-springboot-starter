@@ -58,6 +58,28 @@ public class Interceptor implements VertxHandlerInterceptor {
 
 ```
 
+sync demo
+```
+    @RequestMapping(value = "/test4", method = RequestMethod.GET)
+    public Map post4(RoutingContext context) {
+        Map map = new HashMap();
+        map.put("context", context.data());
+        map.put("path", context.request().path());
+        return mongoService.getMusicsSync();
+    }
+
+```
+
+async demo
+```
+        @AsyncHandler
+        @RequestMapping(value = "/test5", method = RequestMethod.GET)
+        public void post5(RoutingContext context, String id) {
+            mongoService.getMusics(context);
+        }
+
+```
+
 == Help
 
 * https://vertx.io/docs/[Vert.x Documentation]

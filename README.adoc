@@ -13,11 +13,11 @@ This application was generated using http://start.vertx.io
 == 开始
 
 ```
-    <dependency>
-			<groupId>com.zzy</groupId>
-			<artifactId>vertx-spring-boot-starter</artifactId>
-			<version>1.0.3-SNAPSHOT</version>
-		</dependency>
+    		<dependency>
+    			<groupId>com.github.zhengyuyzhao</groupId>
+    			<artifactId>vertx-spring-boot-starter</artifactId>
+    			<version>1.0.4</version>
+    		</dependency>
 ```
 
 Controller demo

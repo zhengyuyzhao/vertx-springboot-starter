@@ -84,7 +84,7 @@ public class RouterIniter implements BeanPostProcessor , ApplicationContextAware
                 route = router.route(convertHttpMethod(requestMethod), path);
               }
             } else {
-              route = router.route(path).blockingHandler(handler);
+              route = router.route(path);
             }
             if (async) {
               route.handler(handler);

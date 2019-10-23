@@ -89,7 +89,7 @@ public class RouterIniter implements BeanPostProcessor , ApplicationContextAware
             if (async) {
               route.handler(handler);
             } else {
-              route.blockingHandler(handler);
+              route.blockingHandler(handler, false);
             }
           } catch (Exception e) {
             e.printStackTrace();

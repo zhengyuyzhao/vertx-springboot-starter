@@ -2,30 +2,26 @@ package com.zzy.vertx.core;
 
 import com.zzy.vertx.config.VertxConfig;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
 import io.vertx.ext.web.Router;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
-@Configuration
+import static org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE;
+
+@Component
 @ConditionalOnBean(Router.class)
 @EnableConfigurationProperties(VertxConfig.class)
-public class VertxServer extends AbstractVerticle implements ApplicationContextAware, InitializingBean {
+@Scope(SCOPE_PROTOTYPE)
+public class VertxServer extends AbstractVerticle {
 
   @Autowired
   private VertxConfig vertxConfig;
 
   @Autowired
   private Router router;
-
-  private ApplicationContext springContext;
 
 
   @Override
@@ -39,16 +35,4 @@ public class VertxServer extends AbstractVerticle implements ApplicationContextA
     super.stop();
   }
 
-  @Override
-  public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-    this.springContext = applicationContext;
-  }
-
-  @Override
-  public void afterPropertiesSet() throws Exception {
-    VertxOptions vertxOptions = new VertxOptions();
-    vertxOptions.setWorkerPoolSize(vertxConfig.getWorkPoolSize())
-      .setEventLoopPoolSize(vertxConfig.getInstance());
-    Vertx.vertx().deployVerticle(this);
-  }
 }

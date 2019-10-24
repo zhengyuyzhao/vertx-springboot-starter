@@ -25,12 +25,10 @@ public class VertxConfigure {
   @Autowired
   private VertxOptions options;
 
-
   @Bean
   @Order(10)
   @ConditionalOnMissingBean(value = Vertx.class)
   @ConditionalOnClass(name = {"com.hazelcast.core.HazelcastInstance", "io.vertx.spi.cluster.hazelcast.HazelcastClusterManager"})
-
   public Vertx vertxHazelcast() throws ExecutionException, InterruptedException {
     logger.info("-----------------vert--init--vertxHazelcast");
     Config hazelcastConfig = ConfigUtil.loadConfig();

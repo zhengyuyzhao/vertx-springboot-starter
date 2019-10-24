@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({VertxAutoConfigure.class ,VertxHandlerInterceptorAutoConfigure.class, VertxRouterAutoConfigure.class, VertxServer.class, SpringVerticleFactory.class,})
+@Import({VertxAutoConfigure.class ,VertxHandlerInterceptorAutoConfigure.class, VertxRouterAutoConfigure.class, VertxServer.class, SpringVerticleFactory.class, SpringVerticleDeployer.class,})
 public class VertxServerAutoConfigure {
 }

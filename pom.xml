@@ -6,7 +6,7 @@
 
   <groupId>com.github.zhengyuyzhao</groupId>
   <artifactId>vertx-spring-boot-starter</artifactId>
-  <version>1.0.8</version>
+  <version>1.0.10-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>
@@ -39,6 +39,30 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-hazelcast</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-zookeeper</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
+      </exclusions>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-ignite</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>

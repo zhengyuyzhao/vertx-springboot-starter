@@ -2,6 +2,7 @@ package com.zzy.vertx.core;
 
 import com.zzy.vertx.config.VertxConfig;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.ext.web.Router;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -25,14 +26,23 @@ public class VertxServer extends AbstractVerticle {
 
 
   @Override
-  public void start() throws Exception {
+  public void start(Future<Void> startFuture) throws Exception {
     super.start();
-    vertx.createHttpServer().requestHandler(router).listen(vertxConfig.getPort());
+    vertx.createHttpServer().requestHandler(router).listen(vertxConfig.getPort(), httpServerAsyncResult -> {
+      if(httpServerAsyncResult.succeeded()){
+        startFuture.complete();
+      }else {
+        startFuture.fail(httpServerAsyncResult.cause());
+      }
+    });
+
   }
 
   @Override
-  public void stop() throws Exception {
+  public void stop(Future<Void> endFuture) throws Exception {
     super.stop();
+    vertx.deployVerticle(this);
+    endFuture.complete();
   }
 
 }

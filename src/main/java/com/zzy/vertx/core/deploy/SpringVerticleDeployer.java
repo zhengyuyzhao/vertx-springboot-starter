@@ -1,21 +1,16 @@
-package com.zzy.vertx.core;
+package com.zzy.vertx.core.deploy;
 
 import com.zzy.vertx.config.VertxConfig;
+import com.zzy.vertx.core.VertxServer;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.spi.VerticleFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.context.event.ApplicationFailedEvent;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextStoppedEvent;
 
 import javax.annotation.PostConstruct;
 

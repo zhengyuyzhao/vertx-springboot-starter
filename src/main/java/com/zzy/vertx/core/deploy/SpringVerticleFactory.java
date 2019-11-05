@@ -1,4 +1,4 @@
-package com.zzy.vertx.core;
+package com.zzy.vertx.core.deploy;
 
 import com.zzy.vertx.config.VertxConfig;
 import io.vertx.core.Verticle;

@@ -18,6 +18,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -60,7 +61,7 @@ public class RouterIniter implements BeanPostProcessor , ApplicationContextAware
           vertxParams = getSpringParams(parameters, method);
           RequestMethod[] methodSet = mappingInfo.method();
           String[] products = mappingInfo.produces();
-          String product = products.length > 0 ? products[0] : DEFAULT_PRODUCT;
+          String product = products.length > 0 ? StringUtils.arrayToDelimitedString(parameters, ";") : DEFAULT_PRODUCT;
           int pathLength = mappingInfo.path().length;
           String path = baseUrl + (pathLength > 0 ? mappingInfo.path()[0] : "");
           path = formatSpringPath(path);

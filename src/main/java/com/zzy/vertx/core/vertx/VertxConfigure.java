@@ -90,7 +90,7 @@ public class VertxConfigure {
   }
 
   @Bean
-  @Order(Ordered.LOWEST_PRECEDENCE)
+  @Order()
   @ConditionalOnMissingBean(value = Vertx.class)
   @ConditionalOnClass(Vertx.class)
   public Vertx vertxSingle() {

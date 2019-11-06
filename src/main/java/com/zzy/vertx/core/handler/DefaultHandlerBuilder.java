@@ -1,8 +1,6 @@
 package com.zzy.vertx.core.handler;
 
-import com.zzy.vertx.core.annotaion.AsyncHandler;
-import com.zzy.vertx.core.router.RouterIniter;
-import com.zzy.vertx.core.router.VertxParam;
+import com.zzy.vertx.core.message.MessageConvertManager;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
@@ -11,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.HandlerMethod;
@@ -26,6 +25,9 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
   public static final String DEFAULT_PRODUCT = "application/json;charset=UTF-8";
   @Autowired
   private VertxHandlerInterceptorManager interceptorManager;
+
+  @Autowired
+  private MessageConvertManager convertManager;
   @Override
   public Handler<RoutingContext> build(Method method, Object bean, boolean isAsync) {
     RequestMapping mappingInfo = getMappingForMethod(method);
@@ -35,7 +37,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
       Parameter[] parameters = method.getParameters();
       vertxParams = getSpringParams(parameters, method);
       String[] products = mappingInfo.produces();
-      String product = products.length > 0 ? StringUtils.arrayToDelimitedString(parameters, ";") : DEFAULT_PRODUCT;
+      String product = products.length > 0 ? StringUtils.arrayToDelimitedString(products, ";") : DEFAULT_PRODUCT;
       if (isAsync) {
         handler = buildAsyncHandler(vertxParams, method, bean, product);
       } else {
@@ -45,7 +47,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
     return handler;
   }
 
-  private Handler<RoutingContext> buildHandler(List<VertxParam> vertxParams, Method method, Object bean, String product) {
+  protected Handler<RoutingContext> buildHandler(List<VertxParam> vertxParams, Method method, Object bean, String product) {
     return ctx -> {
       try {
         HandlerMethod handlerMethod = new HandlerMethod(bean, method);
@@ -59,7 +61,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
           interceptorManager.postHandle(ctx, handlerMethod, result);
           if (!(ctx.response().ended() || ctx.response().closed())) {
             ctx.response().putHeader("Content-Type", product);
-            ctx.response().end(Json.encode(result));
+            ctx.response().end(convertManager.encode(method.getReturnType(), result, MediaType.valueOf(product)));
           }
         } else {
           ctx.response().close();
@@ -71,23 +73,30 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
     };
   }
 
-  private List<Object> buildHandlerInvokeParamList(List<VertxParam> vertxParams, RoutingContext ctx) {
+  private List<Object> buildHandlerInvokeParamList(List<VertxParam> vertxParams, RoutingContext ctx) throws Exception{
     List<Object> paramList = new ArrayList<>();
     for (VertxParam expression : vertxParams) {
       if (RoutingContext.class.equals(expression.getType())) {
         paramList.add(ctx);
       } else if ("body".equals(expression.getValue())) {
-        Object realBody = Json.decodeValue(ctx.getBody(), expression.getType());
-        if (realBody != null) {
-          paramList.add(realBody);
-        } else if (expression.isRequired()) {
-          ctx.response().setStatusCode(400).end("requestBody is required");
-          return null;
-        } else {
+        if(ctx.getBody() == null || ctx.getBody().length() <= 0){
           paramList.add(null);
+        }else{
+          String consume = ctx.request().getHeader("Content-Type");
+          MediaType mediaType = StringUtils.isEmpty(consume) ? MediaType.ALL : MediaType.valueOf(consume);
+          Object realBody = convertManager.decode(expression.getType(), ctx.getBody(), mediaType);
+          if (realBody != null) {
+            paramList.add(realBody);
+          } else if (expression.isRequired()) {
+            ctx.response().setStatusCode(400).end("requestBody is required");
+            return null;
+          } else {
+            paramList.add(null);
+          }
         }
+
       } else {
-        Object par = ctx.request().getParam(expression.getValue());
+        String par = ctx.request().getParam(expression.getValue());
         Object realPar = convert(expression.getType(), par);
         if (realPar != null) {
           paramList.add(realPar);
@@ -102,19 +111,18 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
     return paramList;
   }
 
-
-  private <T> T convert(Class<T> clz, Object o) {
+  private <T> T convert(Class<T> clz, String o) {
     if (o == null || "\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n".equals(o)) {
       return null;
     }
     try {
-      return Json.decodeValue(Json.encodeToBuffer(o), clz);
+      return Json.decodeValue(o, clz);
     } catch (Exception e) {
       return null;
     }
   }
 
-  private Handler<RoutingContext> buildAsyncHandler(List<VertxParam> vertxParams, Method method, Object bean, String product) {
+  protected Handler<RoutingContext> buildAsyncHandler(List<VertxParam> vertxParams, Method method, Object bean, String product) {
     return ctx -> {
       try {
         HandlerMethod handlerMethod = new HandlerMethod(bean, method);
@@ -178,12 +186,12 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
     return vertxParams;
   }
 
-  protected RequestMapping getMappingForMethod(Method method) {
+  private RequestMapping getMappingForMethod(Method method) {
     RequestMapping info = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
     return info;
   }
 
-  protected <A extends Annotation> A getParam(Parameter parameter, Class<A> handlerType) {
+  private  <A extends Annotation> A getParam(Parameter parameter, Class<A> handlerType) {
     A info = AnnotatedElementUtils.findMergedAnnotation(parameter, handlerType);
     return info;
   }

@@ -6,7 +6,7 @@
 
   <groupId>com.github.zhengyuyzhao</groupId>
   <artifactId>vertx-spring-boot-starter</artifactId>
-  <version>1.0.10-SNAPSHOT</version>
+  <version>1.0.11-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>

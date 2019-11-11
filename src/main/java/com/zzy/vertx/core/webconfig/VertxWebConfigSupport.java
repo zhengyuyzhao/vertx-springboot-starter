@@ -26,7 +26,7 @@ public class VertxWebConfigSupport implements ApplicationContextAware {
   @Bean
   @ConditionalOnMissingBean
   @Order()
-  public Router router(){
+  public Router routerBean(){
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
     router.errorHandler(404, ctx ->{

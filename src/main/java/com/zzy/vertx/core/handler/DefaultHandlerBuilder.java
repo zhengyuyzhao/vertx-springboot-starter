@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class DefaultHandlerBuilder implements VertxHandlerBuilder{
   private static final Logger logger = LoggerFactory.getLogger(DefaultHandlerBuilder.class);
@@ -114,6 +115,9 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
   private <T> T convert(Class<T> clz, String o) {
     if (o == null || "\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n".equals(o)) {
       return null;
+    }
+    if(clz.isAssignableFrom(String.class) || clz.isPrimitive()){
+      return clz.cast(o);
     }
     try {
       return Json.decodeValue(o, clz);

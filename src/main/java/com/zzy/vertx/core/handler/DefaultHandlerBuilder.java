@@ -6,12 +6,18 @@ import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.HandlerMethod;
 
 import java.lang.annotation.Annotation;
@@ -19,16 +25,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class DefaultHandlerBuilder implements VertxHandlerBuilder{
+public class DefaultHandlerBuilder implements VertxHandlerBuilder {
   private static final Logger logger = LoggerFactory.getLogger(DefaultHandlerBuilder.class);
   public static final String DEFAULT_PRODUCT = "application/json;charset=UTF-8";
   @Autowired
   private VertxHandlerInterceptorManager interceptorManager;
 
+  private DefaultDataBinder dataBinder = new DefaultDataBinder();
+
   @Autowired
   private MessageConvertManager convertManager;
+
   @Override
   public Handler<RoutingContext> build(Method method, Object bean, boolean isAsync) {
     RequestMapping mappingInfo = getMappingForMethod(method);
@@ -67,22 +75,25 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
         } else {
           ctx.response().close();
         }
-      } catch (Exception e) {
+      } catch (TypeMismatchException tme){
+        ctx.response().setStatusCode(400).end(tme.getMessage());
+      }
+      catch (Exception e) {
         e.printStackTrace();
         ctx.response().setStatusCode(500).end(e.getMessage());
       }
     };
   }
 
-  private List<Object> buildHandlerInvokeParamList(List<VertxParam> vertxParams, RoutingContext ctx) throws Exception{
+  private List<Object> buildHandlerInvokeParamList(List<VertxParam> vertxParams, RoutingContext ctx) throws Exception {
     List<Object> paramList = new ArrayList<>();
     for (VertxParam expression : vertxParams) {
       if (RoutingContext.class.equals(expression.getType())) {
         paramList.add(ctx);
       } else if ("body".equals(expression.getValue())) {
-        if(ctx.getBody() == null || ctx.getBody().length() <= 0){
+        if (ctx.getBody() == null || ctx.getBody().length() <= 0) {
           paramList.add(null);
-        }else{
+        } else {
           String consume = ctx.request().getHeader("Content-Type");
           MediaType mediaType = StringUtils.isEmpty(consume) ? MediaType.ALL : MediaType.valueOf(consume);
           Object realBody = convertManager.decode(expression.getType(), ctx.getBody(), mediaType);
@@ -98,26 +109,26 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
 
       } else {
         String par = ctx.request().getParam(expression.getValue());
-        Object realPar = convert(expression.getType(), par);
+        Object realPar = convert(expression.getType(), par, expression.getDateFormat());
         if (realPar != null) {
           paramList.add(realPar);
         } else if (expression.isRequired()) {
           ctx.response().setStatusCode(400).end(expression.getValue() + " is required");
           return null;
         } else {
-          paramList.add(convert(expression.getType(), expression.getDefaultValue()));
+          paramList.add(convert(expression.getType(), expression.getDefaultValue(), expression.getDateFormat()));
         }
       }
     }
     return paramList;
   }
 
-  private <T> T convert(Class<T> clz, String o) {
+  private <T> T convert(Class<T> clz, String o, String dateFormate) {
     if (o == null || "\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n".equals(o)) {
       return null;
     }
-    if(clz.isAssignableFrom(String.class) || clz.isPrimitive()){
-      return clz.cast(o);
+    if (BeanUtils.isSimpleProperty(clz)) {
+      return dataBinder.convertIfNecessary(o, clz, dateFormate);
     }
     try {
       return Json.decodeValue(o, clz);
@@ -146,10 +157,12 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
       }
     };
   }
+
   private String[] getParameterNames(Method method) {
     LocalVariableTableParameterNameDiscoverer u = new LocalVariableTableParameterNameDiscoverer();
     return u.getParameterNames(method);
   }
+
   private String getRealParamName(String name, String value, String parameterName) {
     String result = value;
     if (StringUtils.isEmpty(result)) {
@@ -171,21 +184,23 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
       RequestParam paramInfo = getParam(parameter, RequestParam.class);
       PathVariable pathVariable = getParam(parameter, PathVariable.class);
       RequestBody requestBody = getParam(parameter, RequestBody.class);
+      DateTimeFormat dateTimeFormat = getParam(parameter, DateTimeFormat.class);
+      String dtf = dateTimeFormat == null ? null : dateTimeFormat.pattern();
       if (paramInfo != null) {
         String realName = getRealParamName(paramInfo.name(), paramInfo.value(), paremeterName);
-        vertxParams.add(new VertxParam(realName, realName, paramInfo.defaultValue(), parameter.getType(), paramInfo.required()));
+        vertxParams.add(new VertxParam(realName, realName, paramInfo.defaultValue(), parameter.getType(), paramInfo.required(), dtf));
         continue;
       }
       if (pathVariable != null) {
         String realName = getRealParamName(pathVariable.name(), pathVariable.value(), paremeterName);
-        vertxParams.add(new VertxParam(realName, realName, null, parameter.getType(), true));
+        vertxParams.add(new VertxParam(realName, realName, null, parameter.getType(), true, dtf));
         continue;
       }
       if (requestBody != null) {
         vertxParams.add(new VertxParam("body", "body", null, parameter.getType(), requestBody.required()));
         continue;
       }
-      vertxParams.add(new VertxParam(paremeterName, paremeterName, null, parameter.getType(), false));
+      vertxParams.add(new VertxParam(paremeterName, paremeterName, null, parameter.getType(), false, dtf));
     }
     return vertxParams;
   }
@@ -195,7 +210,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder{
     return info;
   }
 
-  private  <A extends Annotation> A getParam(Parameter parameter, Class<A> handlerType) {
+  private <A extends Annotation> A getParam(Parameter parameter, Class<A> handlerType) {
     A info = AnnotatedElementUtils.findMergedAnnotation(parameter, handlerType);
     return info;
   }

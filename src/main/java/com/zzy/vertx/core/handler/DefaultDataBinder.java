@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultDataBinder {
-  private Map<String, SimpleTypeConverter> converters = new ConcurrentHashMap();
+  private static final Map<String, SimpleTypeConverter> converters = new ConcurrentHashMap();
   private final String dateFormat = "yyyy-MM-dd HH:mm:ss";
 
   DefaultDataBinder() {

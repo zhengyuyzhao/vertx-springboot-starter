@@ -70,7 +70,11 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
           interceptorManager.postHandle(ctx, handlerMethod, result);
           if (!(ctx.response().ended() || ctx.response().closed())) {
             ctx.response().putHeader("Content-Type", product);
-            ctx.response().end(convertManager.encode(method.getReturnType(), result, MediaType.valueOf(product)));
+            if(result == null){
+              ctx.response().end("null");
+            }else{
+              ctx.response().end(convertManager.encode(method.getReturnType(), result, MediaType.valueOf(product)));
+            }
           }
         } else {
           ctx.response().close();

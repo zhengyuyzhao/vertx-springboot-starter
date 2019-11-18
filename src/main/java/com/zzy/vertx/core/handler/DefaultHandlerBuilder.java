@@ -157,7 +157,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
         }
       } catch (Exception e) {
         e.printStackTrace();
-        ctx.response().setStatusCode(500).end(e.getMessage());
+        ctx.fail(500, e.getCause());
       }
     };
   }

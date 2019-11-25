@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.HandlerMethod;
 
+import javax.validation.ConstraintViolationException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -79,12 +80,13 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
         } else {
           ctx.response().close();
         }
-      } catch (TypeMismatchException tme){
-        ctx.response().setStatusCode(400).end(tme.getMessage());
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         e.printStackTrace();
-        ctx.fail(500, e.getCause());
+        if(e instanceof TypeMismatchException || e instanceof ConstraintViolationException){
+          ctx.fail(400, e.getCause());
+        }else {
+          ctx.fail(500, e.getCause());
+        }
       }
     };
   }
@@ -157,7 +159,11 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
         }
       } catch (Exception e) {
         e.printStackTrace();
-        ctx.fail(500, e.getCause());
+        if(e instanceof TypeMismatchException || e instanceof ConstraintViolationException){
+          ctx.fail(400, e.getCause());
+        }else {
+          ctx.fail(500, e.getCause());
+        }
       }
     };
   }

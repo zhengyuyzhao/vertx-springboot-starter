@@ -22,6 +22,9 @@ public class VertxHandlerInterceptorManager {
   }
 
   public boolean preHandle(RoutingContext context, Object handler) throws Exception{
+    if(handlerInterceptors.size() == 0){
+      return true;
+    }
     for(VertxHandlerInterceptor interceptor : handlerInterceptors){
       boolean result = interceptor.preHandle(context, handler);
       if(!result){
@@ -33,6 +36,9 @@ public class VertxHandlerInterceptorManager {
   }
 
   public void postHandle(RoutingContext context, Object handler, Object data) throws Exception{
+    if(handlerInterceptors.size() == 0){
+      return;
+    }
     for(VertxHandlerInterceptor interceptor : handlerInterceptors){
       interceptor.postHandle(context, handler, data);
     }

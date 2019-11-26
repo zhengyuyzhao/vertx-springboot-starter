@@ -1,5 +1,6 @@
 package com.zzy.vertx.core.handler;
 
+import com.esotericsoftware.reflectasm.MethodAccess;
 import com.zzy.vertx.core.message.MessageConvertManager;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
@@ -58,6 +59,8 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
   }
 
   protected Handler<RoutingContext> buildHandler(List<VertxParam> vertxParams, Method method, Object bean, String product) {
+    MethodAccess access = MethodAccess.get(bean.getClass());
+    int index = access.getIndex(method.getName(), method.getParameterTypes());
     return ctx -> {
       try {
         HandlerMethod handlerMethod = new HandlerMethod(bean, method);
@@ -67,13 +70,13 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
           if (paramList == null) {
             return;
           }
-          Object result = method.invoke(bean, paramList.toArray());
+          Object result = access.invoke(bean, index, paramList.toArray());
           interceptorManager.postHandle(ctx, handlerMethod, result);
           if (!(ctx.response().ended() || ctx.response().closed())) {
             ctx.response().putHeader("Content-Type", product);
-            if(result == null){
+            if (result == null) {
               ctx.response().end("null");
-            }else{
+            } else {
               ctx.response().end(convertManager.encode(method.getReturnType(), result, MediaType.valueOf(product)));
             }
           }
@@ -82,10 +85,10 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
         }
       } catch (Exception e) {
         e.printStackTrace();
-        if(e instanceof TypeMismatchException || e instanceof ConstraintViolationException){
-          ctx.fail(400, e.getCause());
-        }else {
-          ctx.fail(500, e.getCause());
+        if (e instanceof TypeMismatchException || e instanceof ConstraintViolationException) {
+          ctx.fail(400, e);
+        } else {
+          ctx.fail(500, e);
         }
       }
     };
@@ -144,6 +147,8 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
   }
 
   protected Handler<RoutingContext> buildAsyncHandler(List<VertxParam> vertxParams, Method method, Object bean, String product) {
+    MethodAccess access = MethodAccess.get(bean.getClass());
+    int index = access.getIndex(method.getName(), method.getParameterTypes());
     return ctx -> {
       try {
         HandlerMethod handlerMethod = new HandlerMethod(bean, method);
@@ -153,16 +158,16 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
           if (paramList == null) {
             return;
           }
-          method.invoke(bean, paramList.toArray());
+          access.invoke(bean, index, paramList.toArray());
         } else {
           ctx.response().close();
         }
       } catch (Exception e) {
         e.printStackTrace();
-        if(e instanceof TypeMismatchException || e instanceof ConstraintViolationException){
-          ctx.fail(400, e.getCause());
-        }else {
-          ctx.fail(500, e.getCause());
+        if (e instanceof TypeMismatchException || e instanceof ConstraintViolationException) {
+          ctx.fail(400, e);
+        } else {
+          ctx.fail(500, e);
         }
       }
     };

@@ -9,6 +9,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.SpringProxy;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -16,6 +18,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -24,6 +27,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 public class RouterIniter implements BeanPostProcessor, ApplicationContextAware {
@@ -40,9 +46,15 @@ public class RouterIniter implements BeanPostProcessor, ApplicationContextAware 
     this.router = router;
   }
 
+
   @Override
-  public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-    Class cla = bean.getClass();
+  public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    Class cla;
+    if(AopUtils.isAopProxy(bean)){
+      cla = AopUtils.getTargetClass(bean);
+    }else {
+      cla = bean.getClass();
+    }
     String baseUrl = "";
     if (cla.isAnnotationPresent(Controller.class) || cla.isAnnotationPresent(RestController.class)) {
       if (cla.isAnnotationPresent(RequestMapping.class)) {

@@ -1,5 +1,6 @@
 package com.zzy.vertx.core.router;
 
+import com.zzy.vertx.config.VertxConfig;
 import com.zzy.vertx.core.annotaion.AsyncHandler;
 import com.zzy.vertx.core.handler.VertxHandlerBuilder;
 import io.vertx.core.Handler;
@@ -35,21 +36,39 @@ public class RouterIniter implements BeanPostProcessor, ApplicationContextAware 
   private ApplicationContext applicationContext;
 
   @Autowired
+  private VertxConfig vertxConfig;
+
+  @Autowired
   private VertxHandlerBuilder handlerBuilder;
 
   public RouterIniter(Router router) {
     this.router = router;
   }
 
+  @Override
+  public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    if(!vertxConfig.isRouterAop()){
+      buildRouter(bean, bean.getClass());
+    }
+    return bean;
+  }
+
 
   @Override
   public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-    Class cla;
-    if (AopUtils.isAopProxy(bean)) {
-      cla = AopUtils.getTargetClass(bean);
-    } else {
-      cla = bean.getClass();
+    if(vertxConfig.isRouterAop()){
+      Class cla;
+      if (AopUtils.isAopProxy(bean)) {
+        cla = AopUtils.getTargetClass(bean);
+      } else {
+        cla = bean.getClass();
+      }
+      buildRouter(bean, cla);
     }
+    return bean;
+  }
+
+  private void buildRouter(Object bean, Class cla) {
     String baseUrl = "";
     if (cla.isAnnotationPresent(Controller.class) || cla.isAnnotationPresent(RestController.class)) {
       if (cla.isAnnotationPresent(RequestMapping.class)) {
@@ -101,7 +120,6 @@ public class RouterIniter implements BeanPostProcessor, ApplicationContextAware 
         }
       }
     }
-    return bean;
   }
 
   private boolean checkPath(String path) {

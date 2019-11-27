@@ -12,6 +12,16 @@ public class VertxConfig {
 
   private int instance = VertxOptions.DEFAULT_EVENT_LOOP_POOL_SIZE;
 
+  private boolean routerAop = true;
+
+  public boolean isRouterAop() {
+    return routerAop;
+  }
+
+  public void setRouterAop(boolean routerAop) {
+    this.routerAop = routerAop;
+  }
+
   public int getInstance() {
     return instance;
   }

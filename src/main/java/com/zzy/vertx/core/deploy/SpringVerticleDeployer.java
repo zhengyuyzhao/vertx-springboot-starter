@@ -34,7 +34,7 @@ public class SpringVerticleDeployer {
     vertx.registerVerticleFactory(verticleFactory);
     // Scale the verticles on cores: create 4 instances during the deployment
     DeploymentOptions options = new DeploymentOptions()
-      .setHa(true)
+      .setHa(vertxConfig.isHa())
       .setWorker(false)
       .setWorkerPoolSize(vertxConfig.getWorkPoolSize())
       .setInstances(vertxConfig.getInstance());

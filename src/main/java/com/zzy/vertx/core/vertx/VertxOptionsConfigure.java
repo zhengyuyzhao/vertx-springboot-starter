@@ -16,7 +16,8 @@ public class VertxOptionsConfigure {
 
   @Bean
   public VertxOptions vertxOptions(){
-    return new VertxOptions().setEventLoopPoolSize(vertxConfig.getInstance())
+    return vertxConfig.getVertxOptions().setEventBusOptions(vertxConfig.getEventBusOptions())
+      .setEventLoopPoolSize(vertxConfig.getInstance())
       .setWorkerPoolSize(vertxConfig.getWorkPoolSize());
   }
 }

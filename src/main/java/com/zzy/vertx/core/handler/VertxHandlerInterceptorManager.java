@@ -1,10 +1,10 @@
 package com.zzy.vertx.core.handler;
 
 import io.vertx.ext.web.RoutingContext;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class VertxHandlerInterceptorManager {
 

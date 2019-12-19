@@ -1,7 +1,6 @@
 package com.zzy.vertx.core.vertx;
 
 import com.hazelcast.config.Config;
-import com.zzy.vertx.core.router.RouterIniter;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.spi.cluster.hazelcast.ConfigUtil;
@@ -11,12 +10,10 @@ import io.vertx.spi.cluster.zookeeper.ZookeeperClusterManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
 import java.util.concurrent.CompletableFuture;
@@ -24,7 +21,7 @@ import java.util.concurrent.ExecutionException;
 
 @Configuration
 public class VertxConfigure {
-  private static final Logger logger = LoggerFactory.getLogger(RouterIniter.class);
+  private static final Logger logger = LoggerFactory.getLogger(VertxConfigure.class);
   @Autowired
   private VertxOptions options;
 

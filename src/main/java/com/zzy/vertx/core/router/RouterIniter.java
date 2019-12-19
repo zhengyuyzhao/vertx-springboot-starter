@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.MediaType;
@@ -26,17 +27,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
-public class RouterIniter implements BeanPostProcessor, ApplicationContextAware {
+public class RouterIniter implements SmartLifecycle, ApplicationContextAware {
   private static final Logger logger = LoggerFactory.getLogger(RouterIniter.class);
   public static final String DEFAULT_PRODUCT = MediaType.APPLICATION_JSON_UTF8_VALUE;
   public static final String DEFAULT_CONSUME = "*";
+  private boolean running ;
   private Router router;
   private ApplicationContext applicationContext;
 
-  @Autowired
-  private VertxConfig vertxConfig;
+//  @Autowired
+//  private VertxConfig vertxConfig;
 
   @Autowired
   private VertxHandlerBuilder handlerBuilder;
@@ -45,28 +49,28 @@ public class RouterIniter implements BeanPostProcessor, ApplicationContextAware 
     this.router = router;
   }
 
-  @Override
-  public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-    if(!vertxConfig.isRouterAop()){
-      buildRouter(bean, bean.getClass());
-    }
-    return bean;
-  }
-
-
-  @Override
-  public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-    if(vertxConfig.isRouterAop()){
-      Class cla;
-      if (AopUtils.isAopProxy(bean)) {
-        cla = AopUtils.getTargetClass(bean);
-      } else {
-        cla = bean.getClass();
-      }
-      buildRouter(bean, cla);
-    }
-    return bean;
-  }
+//  @Override
+//  public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+//    if(!vertxConfig.isRouterAop()){
+//      buildRouter(bean, bean.getClass());
+//    }
+//    return bean;
+//  }
+//
+//
+//  @Override
+//  public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+//    if(vertxConfig.isRouterAop()){
+//      Class cla;
+//      if (AopUtils.isAopProxy(bean)) {
+//        cla = AopUtils.getTargetClass(bean);
+//      } else {
+//        cla = bean.getClass();
+//      }
+//      buildRouter(bean, cla);
+//    }
+//    return bean;
+//  }
 
   private void buildRouter(Object bean, Class cla) {
     String baseUrl = "";
@@ -174,5 +178,33 @@ public class RouterIniter implements BeanPostProcessor, ApplicationContextAware 
   @Override
   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
     this.applicationContext = applicationContext;
+  }
+
+  @Override
+  public void start() {
+    running = true;
+    Map<String, Object> controllers = new HashMap<>();
+    controllers.putAll(this.applicationContext.getBeansWithAnnotation(Controller.class));
+    controllers.putAll(this.applicationContext.getBeansWithAnnotation(RestController.class));
+    for(Object bean: controllers.values()){
+      Class cla;
+      if (AopUtils.isAopProxy(bean)) {
+        cla = AopUtils.getTargetClass(bean);
+      } else {
+        cla = bean.getClass();
+      }
+      buildRouter(bean, cla);
+    }
+    stop();
+  }
+
+  @Override
+  public void stop() {
+    running = false;
+  }
+
+  @Override
+  public boolean isRunning() {
+    return running;
   }
 }

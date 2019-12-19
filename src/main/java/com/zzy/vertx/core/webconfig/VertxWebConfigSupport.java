@@ -3,8 +3,7 @@ package com.zzy.vertx.core.webconfig;
 import com.zzy.vertx.core.handler.DefaultHandlerBuilder;
 import com.zzy.vertx.core.handler.VertxHandlerBuilder;
 import com.zzy.vertx.core.handler.VertxHandlerInterceptorManager;
-import com.zzy.vertx.core.handler.VertxHandlerInterceptorProcessor;
-import com.zzy.vertx.core.message.*;
+import com.zzy.vertx.core.message.MessageConvertManager;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -26,10 +25,10 @@ public class VertxWebConfigSupport implements ApplicationContextAware {
   @Bean
   @ConditionalOnMissingBean
   @Order()
-  public Router routerBean(){
+  public Router routerBean() {
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
-    router.errorHandler(404, ctx ->{
+    router.errorHandler(404, ctx -> {
       ctx.response().setStatusCode(404).end("404");
     });
 
@@ -43,30 +42,6 @@ public class VertxWebConfigSupport implements ApplicationContextAware {
     return new DefaultHandlerBuilder();
   }
 
-  @Bean
-  @ConditionalOnMissingBean
-  public VertxHandlerInterceptorManager vertxHandlerInterceptorManager() {
-    VertxHandlerInterceptorManager manager = new VertxHandlerInterceptorManager();
-    addInterceptors(manager);
-    return manager;
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
-  public VertxHandlerInterceptorProcessor vertxHandlerInterceptorProcessor() {
-    return new VertxHandlerInterceptorProcessor();
-  }
-
-  @Bean
-  @ConditionalOnMissingBean
-  public MessageConvertManager messageOutConvertManager() {
-    MessageConvertManager convertManager = new MessageConvertManager();
-    addMessageConverts(convertManager);
-    convertManager.addMessageConverts(new StringMessageConvert());
-    convertManager.addMessageConverts(new JsonMessageConvert());
-    convertManager.addMessageConverts(new XmlMessageConvert());
-    return convertManager;
-  }
 
   protected void addInterceptors(VertxHandlerInterceptorManager interceptorManager) {
   }

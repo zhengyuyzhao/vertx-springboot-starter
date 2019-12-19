@@ -6,7 +6,7 @@
 
   <groupId>com.github.zhengyuyzhao</groupId>
   <artifactId>vertx-spring-boot-starter</artifactId>
-  <version>1.1.1-SNAPSHOT</version>
+  <version>1.1.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <parent>
@@ -18,7 +18,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <vertx.version>3.8.1</vertx.version>
+    <vertx.version>3.8.4</vertx.version>
     <spring.cloud.version>Finchley.RELEASE</spring.cloud.version>
     <spring.boot.version>2.1.3.RELEASE</spring.boot.version>
     <spring.version>5.1.5.RELEASE</spring.version>
@@ -172,9 +172,10 @@
 
   <!-- 发布管理信息 -->
   <distributionManagement>
+  
     <repository>
       <!-- 这里的id必须要和全局配置中的release id 一致 -->
-      <id>oss</id>
+      <id>oss-release</id>
       <name>Nexus Release Repository</name>
       <!-- 这里就是在创建issue成功后，对方回复的release发布地址-->
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
@@ -215,12 +216,14 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.8</version>
+            <version>1.6.5</version>
             <extensions>true</extensions>
             <configuration>
               <!-- 这里的id必须要和全局配置中的release id 一致 -->
-              <serverId>oss</serverId>
+              <serverId>oss-release</serverId>
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+              <username>943470549@qq.com</username>
+              <password>Zhao@12345678</password>
               <!-- 如果希望发布后自动执行close和release操作，此处可以调整为true -->
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
@@ -230,7 +233,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>2.2.1</version>
+            <version>3.0.1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -260,7 +263,9 @@
 
         </plugins>
       </build>
+
     </profile>
+
   </profiles>
 
 </project>

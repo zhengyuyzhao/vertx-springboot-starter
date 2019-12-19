@@ -4,6 +4,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 @Configuration
-@Import({RouterIniter.class, VertxRouterAwareProcessor.class, })
+@Import({RouterIniter.class})
 public class VertxRouterAutoConfigure {
 }

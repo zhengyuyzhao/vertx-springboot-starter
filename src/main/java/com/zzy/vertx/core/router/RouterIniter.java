@@ -39,38 +39,12 @@ public class RouterIniter implements SmartLifecycle, ApplicationContextAware {
   private Router router;
   private ApplicationContext applicationContext;
 
-//  @Autowired
-//  private VertxConfig vertxConfig;
-
   @Autowired
   private VertxHandlerBuilder handlerBuilder;
 
   public RouterIniter(Router router) {
     this.router = router;
   }
-
-//  @Override
-//  public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-//    if(!vertxConfig.isRouterAop()){
-//      buildRouter(bean, bean.getClass());
-//    }
-//    return bean;
-//  }
-//
-//
-//  @Override
-//  public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-//    if(vertxConfig.isRouterAop()){
-//      Class cla;
-//      if (AopUtils.isAopProxy(bean)) {
-//        cla = AopUtils.getTargetClass(bean);
-//      } else {
-//        cla = bean.getClass();
-//      }
-//      buildRouter(bean, cla);
-//    }
-//    return bean;
-//  }
 
   private void buildRouter(Object bean, Class cla) {
     String baseUrl = "";

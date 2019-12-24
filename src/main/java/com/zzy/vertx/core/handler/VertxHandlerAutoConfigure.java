@@ -22,9 +22,4 @@ public class VertxHandlerAutoConfigure {
     return convertManager;
   }
 
-//  @Bean
-//  @ConditionalOnMissingBean
-//  public VertxHandlerInterceptorProcessor vertxHandlerInterceptorProcessor() {
-//    return new VertxHandlerInterceptorProcessor();
-//  }
 }

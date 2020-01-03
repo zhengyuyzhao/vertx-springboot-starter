@@ -49,10 +49,17 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
       vertxParams = getSpringParams(parameters, method);
       String[] products = mappingInfo.produces();
       String product = products.length > 0 ? StringUtils.arrayToDelimitedString(products, ";") : DEFAULT_PRODUCT;
+
+      Method realMethod ;
+      try {
+        realMethod = bean.getClass().getMethod(method.getName(), method.getParameterTypes());
+      } catch (NoSuchMethodException e) {
+        realMethod = method;
+      }
       if (isAsync) {
-        handler = buildAsyncHandler(vertxParams, method, bean, product);
+        handler = buildAsyncHandler(vertxParams, realMethod, bean, product);
       } else {
-        handler = buildHandler(vertxParams, method, bean, product);
+        handler = buildHandler(vertxParams, realMethod, bean, product);
       }
     }
     return handler;
@@ -101,6 +108,10 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
         paramList.add(ctx);
       } else if ("body".equals(expression.getValue())) {
         if (ctx.getBody() == null || ctx.getBody().length() <= 0) {
+          if (expression.isRequired()) {
+            ctx.response().setStatusCode(400).end("requestBody is required");
+            return null;
+          }
           paramList.add(null);
         } else {
           String consume = ctx.request().getHeader("Content-Type");
@@ -108,14 +119,10 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
           Object realBody = convertManager.decode(expression.getType(), ctx.getBody(), mediaType);
           if (realBody != null) {
             paramList.add(realBody);
-          } else if (expression.isRequired()) {
-            ctx.response().setStatusCode(400).end("requestBody is required");
-            return null;
-          } else {
+          }  else {
             paramList.add(null);
           }
         }
-
       } else {
         String par = ctx.request().getParam(expression.getValue());
         Object realPar = convert(expression.getType(), par, expression.getDateFormat());

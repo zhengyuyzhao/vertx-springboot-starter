@@ -46,9 +46,6 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
   @Autowired
   private MessageConvertManager convertManager;
 
-  @Autowired
-  private Validator validator;
-
   @Override
   public Handler<RoutingContext> build(Method method, Object bean, boolean isAsync) {
     RequestMapping mappingInfo = getMappingForMethod(method);

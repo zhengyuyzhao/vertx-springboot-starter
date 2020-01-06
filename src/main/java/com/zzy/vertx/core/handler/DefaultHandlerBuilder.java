@@ -5,6 +5,7 @@ import com.zzy.vertx.core.message.MessageConvertManager;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
+import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -21,16 +22,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.HandlerMethod;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class DefaultHandlerBuilder implements VertxHandlerBuilder {
   private static final Logger logger = LoggerFactory.getLogger(DefaultHandlerBuilder.class);
   public static final String DEFAULT_PRODUCT = "application/json;charset=UTF-8";
+
   @Autowired
   private VertxHandlerInterceptorManager interceptorManager;
 
@@ -38,6 +45,9 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
 
   @Autowired
   private MessageConvertManager convertManager;
+
+  @Autowired
+  private Validator validator;
 
   @Override
   public Handler<RoutingContext> build(Method method, Object bean, boolean isAsync) {
@@ -91,8 +101,9 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
           ctx.response().close();
         }
       } catch (Exception e) {
-        e.printStackTrace();
-        if (e instanceof TypeMismatchException || e instanceof ConstraintViolationException) {
+//        e.printStackTrace();
+        logger.error(e.getMessage());
+        if (e instanceof TypeMismatchException || e instanceof ValidationException) {
           ctx.fail(400, e);
         } else {
           ctx.fail(500, e);
@@ -109,8 +120,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
       } else if ("body".equals(expression.getValue())) {
         if (ctx.getBody() == null || ctx.getBody().length() <= 0) {
           if (expression.isRequired()) {
-            ctx.response().setStatusCode(400).end("requestBody is required");
-            return null;
+            throw new ValidationException("requestBody is required");
           }
           paramList.add(null);
         } else {
@@ -129,8 +139,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
         if (realPar != null) {
           paramList.add(realPar);
         } else if (expression.isRequired()) {
-          ctx.response().setStatusCode(400).end(expression.getValue() + " is required");
-          return null;
+          throw new ValidationException(expression.getValue() + " is required");
         } else {
           paramList.add(convert(expression.getType(), expression.getDefaultValue(), expression.getDateFormat()));
         }
@@ -170,8 +179,9 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
           ctx.response().close();
         }
       } catch (Exception e) {
-        e.printStackTrace();
-        if (e instanceof TypeMismatchException || e instanceof ConstraintViolationException) {
+//        e.printStackTrace();
+        logger.error(e.getMessage());
+        if (e instanceof TypeMismatchException || e instanceof ValidationException) {
           ctx.fail(400, e);
         } else {
           ctx.fail(500, e);

@@ -35,7 +35,7 @@ public class RouterIniter implements SmartLifecycle, ApplicationContextAware {
   private static final Logger logger = LoggerFactory.getLogger(RouterIniter.class);
   public static final String DEFAULT_PRODUCT = MediaType.APPLICATION_JSON_UTF8_VALUE;
   public static final String DEFAULT_CONSUME = "*";
-  private boolean running ;
+  private boolean running;
   private Router router;
   private ApplicationContext applicationContext;
 
@@ -160,7 +160,7 @@ public class RouterIniter implements SmartLifecycle, ApplicationContextAware {
     Map<String, Object> controllers = new HashMap<>();
     controllers.putAll(this.applicationContext.getBeansWithAnnotation(Controller.class));
     controllers.putAll(this.applicationContext.getBeansWithAnnotation(RestController.class));
-    for(Object bean: controllers.values()){
+    for (Object bean : controllers.values()) {
       Class cla;
       if (AopUtils.isAopProxy(bean)) {
         cla = AopUtils.getTargetClass(bean);
@@ -180,5 +180,21 @@ public class RouterIniter implements SmartLifecycle, ApplicationContextAware {
   @Override
   public boolean isRunning() {
     return running;
+  }
+
+  @Override
+  public boolean isAutoStartup() {
+    return true;
+  }
+
+  @Override
+  public void stop(Runnable runnable) {
+    this.stop();
+    runnable.run();
+  }
+
+  @Override
+  public int getPhase() {
+    return 2147483647;
   }
 }

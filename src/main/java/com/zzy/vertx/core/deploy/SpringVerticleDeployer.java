@@ -80,4 +80,20 @@ public class SpringVerticleDeployer implements SmartLifecycle {
   public boolean isRunning() {
     return this.running;
   }
+
+  @Override
+  public boolean isAutoStartup() {
+    return true;
+  }
+
+  @Override
+  public void stop(Runnable runnable) {
+    this.stop();
+    runnable.run();
+  }
+
+  @Override
+  public int getPhase() {
+    return 2147483647;
+  }
 }

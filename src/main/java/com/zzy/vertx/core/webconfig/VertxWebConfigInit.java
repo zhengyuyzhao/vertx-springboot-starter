@@ -55,4 +55,20 @@ public class VertxWebConfigInit implements SmartLifecycle, ApplicationContextAwa
   public boolean isRunning() {
     return running;
   }
+
+  @Override
+  public boolean isAutoStartup() {
+    return true;
+  }
+
+  @Override
+  public void stop(Runnable runnable) {
+    this.stop();
+    runnable.run();
+  }
+
+  @Override
+  public int getPhase() {
+    return 2147483647;
+  }
 }

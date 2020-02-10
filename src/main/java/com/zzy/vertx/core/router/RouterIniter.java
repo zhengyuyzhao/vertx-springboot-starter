@@ -1,6 +1,5 @@
 package com.zzy.vertx.core.router;
 
-import com.zzy.vertx.config.VertxConfig;
 import com.zzy.vertx.core.annotaion.AsyncHandler;
 import com.zzy.vertx.core.handler.VertxHandlerBuilder;
 import io.vertx.core.Handler;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;

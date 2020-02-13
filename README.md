@@ -1,68 +1,80 @@
 = Starter
 
-image:https://img.shields.io/badge/vert.x-3.8.1-purple.svg[link="https://vertx.io"]
-
-This application was generated using http://start.vertx.io
-
-== 用vertx做spring boot项目的 router ， 摒弃掉servlet
-
-重用 spring web 的 controller, requestMapping 和 requestParam等， 减少移植的代码量
+== springboot 结合 vertx-web , 尝试让springBoot的开发效率和vertx的运行效率结合起来
+  目的是像使用 springboot web starter 一样使用vertx,
+  目前可以使用的注解如下：
 ```
+spring-web 注解中的
 @RestController ， @Controller ， @RequestMapping  ， @RequestParam， @RequestBody
+@PathVariable， @GetMapping. @PutMapping, @PostMapping, @DeleteMapping
+
+spring-validator 注解支持
 ```
+  新加的注解: @AsyncHandler 使用 vertx 异步模式
+  默认使用 vertx 阻塞模式，即 executeBlocking()
 == 开始
 
 ```
-    <dependency>
-			<groupId>com.zzy</groupId>
-			<artifactId>vertx-spring-boot-starter</artifactId>
-			<version>1.0.3-SNAPSHOT</version>
-		</dependency>
+   <dependency>
+    	<groupId>com.github.zhengyuyzhao</groupId>
+    	<artifactId>vertx-spring-boot-starter</artifactId>
+    	<version>1.0.7</version>
+   </dependency>
+```
+== application.yml
+```
+   vert:
+     port: 8000
+     work-pool-size: 100
+     instance: 10
 ```
 
-Controller demo
+== Controller demo
 ```
-@RestController
-@RequestMapping("/test")
-public class Tes1tController {
-}
+    @RestController
+    @RequestMapping("/test")
+    public class Tes1tController {
+    }
 ```
 
-param demo
+== param demo
 ```
     @RequestMapping(value = "/test3/:id", method = RequestMethod.PUT)
-    public Map post(@RequestParam(value = "id") int id,
+    public Map post(@RequestParam(value = "id") @NotNull int id,
                     @RequestParam(value = "qq", required = false, defaultValue = "333") int qq,
                     @RequestBody() Map map) {
                     }
 ```
 ```
- @RequestMapping(value = "/test4", method = RequestMethod.GET)
-    public Map post4(RoutingContext context) {
+    @RequestMapping(value = "/test4", method = RequestMethod.GET)
+        public Map post4(RoutingContext context) {
     }
 ```
-Interceptor demo
+== Interceptor demo
 ```
 @Component
-public class Interceptor implements VertxHandlerInterceptor {
-  @Override
-  public boolean preHandle(RoutingContext context, Object handler) throws Exception {
-    HandlerMethod handlerMethod = (HandlerMethod) handler;
-    if(handlerMethod.getMethod().isAnnotationPresent(ResponseBody.class)){
-      context.response().end("not support responsebody");
-      return false;
+    public class Interceptor implements VertxHandlerInterceptor {
+      @Override
+      public boolean preHandle(RoutingContext context, Object handler) throws Exception {
+        HandlerMethod handlerMethod = (HandlerMethod) handler;
+        if(handlerMethod.getMethod().isAnnotationPresent(ResponseBody.class)){
+          context.response().end("not support responsebody");
+          return false;
+        }
+        return true;
+      }
     }
-    return true;
-  }
-}
 
 ```
 
-== Help
+== async demo
+```
+    @AsyncHandler
+    @RequestMapping(value = "/test5", method = RequestMethod.GET)
+    public void post5(RoutingContext context, @NotNull String id) {
+        mongoService.getMusics(context);
+    }
 
-* https://vertx.io/docs/[Vert.x Documentation]
-* https://stackoverflow.com/questions/tagged/vert.x?sort=newest&pageSize=15[Vert.x Stack Overflow]
-* https://groups.google.com/forum/?fromgroups#!forum/vertx[Vert.x User Group]
-* https://gitter.im/eclipse-vertx/vertx-users[Vert.x Gitter]
+```
 
 

@@ -12,8 +12,8 @@ spring-validator 注解支持
 ```
   新加的注解: @AsyncHandler 使用 vertx 异步模式
   默认使用 vertx 阻塞模式，即 executeBlocking()
-== 开始
 
+== 开始
 ```
    <dependency>
     	<groupId>com.github.zhengyuyzhao</groupId>
@@ -25,8 +25,8 @@ spring-validator 注解支持
 ```
    vert:
      port: 8000
-     work-pool-size: 100
-     instance: 10
+     work-pool-size: 100  // block mode 线程池大小
+     instance: 10       // verticle 部署实例数， 即evevtloop数量
 ```
 
 == Controller demo
@@ -52,7 +52,7 @@ spring-validator 注解支持
 ```
 == Interceptor demo
 ```
-@Component
+    @Component
     public class Interceptor implements VertxHandlerInterceptor {
       @Override
       public boolean preHandle(RoutingContext context, Object handler) throws Exception {
@@ -72,7 +72,7 @@ spring-validator 注解支持
     @AsyncHandler
     @RequestMapping(value = "/test5", method = RequestMethod.GET)
     public void post5(RoutingContext context, @NotNull String id) {
-        mongoService.getMusics(context);
+         context.response().end("test");
     }
 
 ```

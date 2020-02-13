@@ -3,6 +3,7 @@ package com.zzy.vertx.core.vertx;
 import com.hazelcast.config.Config;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.spi.cluster.hazelcast.ConfigUtil;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 import io.vertx.spi.cluster.ignite.IgniteClusterManager;
@@ -33,17 +34,7 @@ public class VertxConfigure {
     logger.info("-----------------vert--init--vertxHazelcast");
     Config hazelcastConfig = ConfigUtil.loadConfig();
     HazelcastClusterManager manager = new HazelcastClusterManager(hazelcastConfig);
-    options.setClusterManager(manager);
-    CompletableFuture<Vertx> future = new CompletableFuture<>();
-    Vertx.clusteredVertx(options, ar -> {
-      if (ar.succeeded()) {
-        future.complete(ar.result());
-      } else {
-        future.completeExceptionally(ar.cause());
-      }
-    });
-    Vertx vertx = future.get();
-    return vertx;
+    return getClusteredVertx(manager);
   }
 
   @Bean
@@ -53,17 +44,7 @@ public class VertxConfigure {
   public Vertx vertxIgnite() throws ExecutionException, InterruptedException {
     logger.info("-----------------vert--init--vertxIgnite");
     IgniteClusterManager manager = new IgniteClusterManager();
-    options.setClusterManager(manager);
-    CompletableFuture<Vertx> future = new CompletableFuture<>();
-    Vertx.clusteredVertx(options, ar -> {
-      if (ar.succeeded()) {
-        future.complete(ar.result());
-      } else {
-        future.completeExceptionally(ar.cause());
-      }
-    });
-    Vertx vertx = future.get();
-    return vertx;
+    return getClusteredVertx(manager);
   }
 
   @Bean
@@ -73,17 +54,7 @@ public class VertxConfigure {
   public Vertx vertxZookeeper() throws ExecutionException, InterruptedException {
     logger.info("-----------------vert--init--vertxZookeeper");
     ZookeeperClusterManager manager = new ZookeeperClusterManager();
-    options.setClusterManager(manager);
-    CompletableFuture<Vertx> future = new CompletableFuture<>();
-    Vertx.clusteredVertx(options, ar -> {
-      if (ar.succeeded()) {
-        future.complete(ar.result());
-      } else {
-        future.completeExceptionally(ar.cause());
-      }
-    });
-    Vertx vertx = future.get();
-    return vertx;
+    return getClusteredVertx(manager);
   }
 
   @Bean
@@ -93,5 +64,18 @@ public class VertxConfigure {
   public Vertx vertxSingle() {
     logger.info("----------------vert--init--single");
     return Vertx.vertx(options);
+  }
+
+  private Vertx getClusteredVertx(ClusterManager manager) throws ExecutionException, InterruptedException {
+    options.setClusterManager(manager);
+    CompletableFuture<Vertx> future = new CompletableFuture<>();
+    Vertx.clusteredVertx(options, ar -> {
+      if (ar.succeeded()) {
+        future.complete(ar.result());
+      } else {
+        future.completeExceptionally(ar.cause());
+      }
+    });
+    return future.get();
   }
 }

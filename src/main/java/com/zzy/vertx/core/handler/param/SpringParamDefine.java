@@ -5,9 +5,7 @@ import java.util.List;
 
 public class SpringParamDefine {
   private String name;
-//  private String value;
   private String defaultValue;
-  private String dateFormat;
   private Class type;
   private boolean required;
 
@@ -19,31 +17,14 @@ public class SpringParamDefine {
 
   public SpringParamDefine(String name, String defaultValue, Class type, boolean required) {
     this.name = name;
-//    this.value = value;
     this.defaultValue = defaultValue;
     this.type = type;
     this.required = required;
   }
 
-  public SpringParamDefine(String name, String defaultValue, Class type, boolean required, String dateFormat) {
-    this.name = name;
-//    this.value = value;
-    this.defaultValue = defaultValue;
-    this.type = type;
-    this.required = required;
-    this.dateFormat = dateFormat;
-  }
 
   public List<ParamTransferHandler> getHandlers() {
     return handlers;
-  }
-
-  public String getDateFormat() {
-    return dateFormat;
-  }
-
-  public void setDateFormat(String dateFormat) {
-    this.dateFormat = dateFormat;
   }
 
   public String getDefaultValue() {

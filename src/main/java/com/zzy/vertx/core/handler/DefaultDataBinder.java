@@ -14,7 +14,7 @@ public class DefaultDataBinder {
   private static final Map<String, SimpleTypeConverter> converters = new ConcurrentHashMap();
   private final String dateFormat = "yyyy-MM-dd HH:mm:ss";
 
-  DefaultDataBinder() {
+  public DefaultDataBinder() {
     ConversionService conversionService = new WebConversionService(dateFormat);
     SimpleTypeConverter typeConverter = new SimpleTypeConverter();
     typeConverter.setConversionService(conversionService);

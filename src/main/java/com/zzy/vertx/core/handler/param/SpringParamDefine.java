@@ -1,28 +1,41 @@
-package com.zzy.vertx.core.handler;
+package com.zzy.vertx.core.handler.param;
 
-public class VertxParam {
+import java.util.ArrayList;
+import java.util.List;
+
+public class SpringParamDefine {
   private String name;
-  private String value;
+//  private String value;
   private String defaultValue;
   private String dateFormat;
   private Class type;
   private boolean required;
 
-  public VertxParam(String name, String value, String defaultValue, Class type, boolean required) {
+  private final List<ParamTransferHandler> handlers = new ArrayList<>();
+
+  public SpringParamDefine(){
+
+  }
+
+  public SpringParamDefine(String name, String defaultValue, Class type, boolean required) {
     this.name = name;
-    this.value = value;
+//    this.value = value;
     this.defaultValue = defaultValue;
     this.type = type;
     this.required = required;
   }
 
-  public VertxParam(String name, String value, String defaultValue, Class type, boolean required, String dateFormat) {
+  public SpringParamDefine(String name, String defaultValue, Class type, boolean required, String dateFormat) {
     this.name = name;
-    this.value = value;
+//    this.value = value;
     this.defaultValue = defaultValue;
     this.type = type;
     this.required = required;
     this.dateFormat = dateFormat;
+  }
+
+  public List<ParamTransferHandler> getHandlers() {
+    return handlers;
   }
 
   public String getDateFormat() {
@@ -31,14 +44,6 @@ public class VertxParam {
 
   public void setDateFormat(String dateFormat) {
     this.dateFormat = dateFormat;
-  }
-
-  public String getValue() {
-    return value;
-  }
-
-  public void setValue(String value) {
-    this.value = value;
   }
 
   public String getDefaultValue() {

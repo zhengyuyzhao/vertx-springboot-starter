@@ -1,7 +1,11 @@
 package com.zzy.vertx.core.webconfig;
 
+import com.zzy.vertx.core.handler.VertxHandlerBuilder;
 import com.zzy.vertx.core.handler.VertxHandlerInterceptor;
 import com.zzy.vertx.core.handler.VertxHandlerInterceptorManager;
+import com.zzy.vertx.core.handler.error.ExceptionHandlerManager;
+import com.zzy.vertx.core.handler.param.ParamTransferHandler;
+import com.zzy.vertx.core.handler.param.ParamTransferManager;
 import com.zzy.vertx.core.message.JsonMessageConvert;
 import com.zzy.vertx.core.message.MessageConvertManager;
 import com.zzy.vertx.core.message.StringMessageConvert;
@@ -11,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import java.util.Map;
 
@@ -21,6 +26,16 @@ public class VertxWebConfigInit implements SmartLifecycle, ApplicationContextAwa
 
   @Autowired
   private MessageConvertManager messageConvertManager;
+
+  @Autowired
+  private ParamTransferManager paramTransferManager;
+
+  @Autowired
+  private ExceptionHandlerManager exceptionHandlerManager;
+
+  @Autowired
+  private VertxHandlerBuilder vertxHandlerBuilder;
+
   private boolean running;
 
   @Override
@@ -35,6 +50,12 @@ public class VertxWebConfigInit implements SmartLifecycle, ApplicationContextAwa
     for(VertxHandlerInterceptor interceptor: intercepters.values()){
       vertxHandlerInterceptorManager.addInterceptor(interceptor);
     }
+
+    Map<String, ParamTransferHandler> paramTransferHandlers = this.applicationContext.getBeansOfType(ParamTransferHandler.class);
+    for(ParamTransferHandler transferHandler: paramTransferHandlers.values()){
+      paramTransferManager.addHandler(transferHandler);
+    }
+
     Map<String, VertxWebConfigSupport> webConfigs = this.applicationContext.getBeansOfType(VertxWebConfigSupport.class);
     for(VertxWebConfigSupport support: webConfigs.values()){
       support.addInterceptors(vertxHandlerInterceptorManager);
@@ -43,6 +64,11 @@ public class VertxWebConfigInit implements SmartLifecycle, ApplicationContextAwa
     messageConvertManager.addMessageConverts(new StringMessageConvert());
     messageConvertManager.addMessageConverts(new JsonMessageConvert());
     messageConvertManager.addMessageConverts(new XmlMessageConvert());
+
+    Map<String, Object> errorHandlers = this.applicationContext.getBeansWithAnnotation(ControllerAdvice.class);
+    for(Object handler : errorHandlers.values()){
+      exceptionHandlerManager.addHandlers(vertxHandlerBuilder.buildExceptionHandler(handler));
+    }
     stop();
   }
 

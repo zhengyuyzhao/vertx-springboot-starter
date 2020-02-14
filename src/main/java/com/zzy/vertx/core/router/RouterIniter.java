@@ -25,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
@@ -75,19 +77,21 @@ public class RouterIniter implements SmartLifecycle, ApplicationContextAware {
 
           handler = handlerBuilder.build(method, bean, async);
           try {
-            Route route = null;
+            List<Route> routes = new ArrayList<>();
             if (methodSet.length > 0) {
               for (RequestMethod requestMethod : methodSet) {
-                route = router.route(convertHttpMethod(requestMethod), path);
+                routes.add(router.route(convertHttpMethod(requestMethod), path));
               }
             } else {
-              route = router.route(path);
+              routes.add(router.route(path));
             }
-            route.produces(product).consumes(consume);
-            if (async) {
-              route.handler(handler);
-            } else {
-              route.blockingHandler(handler, false);
+            for(Route route : routes){
+              route.produces(product).consumes(consume);
+              if (async) {
+                route.handler(handler);
+              } else {
+                route.blockingHandler(handler, false);
+              }
             }
           } catch (Exception e) {
             e.printStackTrace();

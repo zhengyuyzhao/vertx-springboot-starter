@@ -1,5 +1,6 @@
 package com.zzy.vertx.core.handler;
 
+import com.zzy.vertx.core.handler.error.ExceptionHandlerManager;
 import com.zzy.vertx.core.handler.param.*;
 import com.zzy.vertx.core.message.MessageConvertManager;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -21,6 +22,13 @@ public class VertxHandlerAutoConfigure {
   public MessageConvertManager messageOutConvertManager() {
     MessageConvertManager convertManager = new MessageConvertManager();
     return convertManager;
+  }
+
+  @Bean
+  @ConditionalOnMissingBean
+  public ExceptionHandlerManager exceptionHandlerManager() {
+    ExceptionHandlerManager exceptionHandlerManager = new ExceptionHandlerManager();
+    return exceptionHandlerManager;
   }
 
   @Bean

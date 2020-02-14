@@ -32,6 +32,8 @@ public class VertxHandlerAutoConfigure {
     transferManager.addHandler(new RequestBodyTransferHandler());
     transferManager.addHandler(new DateTimeFormatTransferHandler());
     transferManager.addHandler(new RoutingContextTransferHandler());
+    transferManager.addHandler(new RequestHeaderTransferHandler());
+    transferManager.addHandler(new CookieValueTransferHandler());
     transferManager.addHandler(new ParamNameTransferHandler());
     return transferManager;
   }

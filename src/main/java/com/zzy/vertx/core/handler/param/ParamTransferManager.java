@@ -36,7 +36,7 @@ public class ParamTransferManager {
   }
 
   public List<Object> transfer(RoutingContext context, List<SpringParamDefine> params) throws Exception{
-    List<Object> transfers = new ArrayList<>();
+    List<Object> transfers = params.size() > 0 ? new ArrayList<>() : null;
     for (SpringParamDefine springParamDefine : params) {
       Object transfered = null;
       for (ParamTransferHandler handler : springParamDefine.getHandlers()) {

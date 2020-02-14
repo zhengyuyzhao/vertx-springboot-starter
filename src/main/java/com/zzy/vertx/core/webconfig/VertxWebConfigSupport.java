@@ -13,6 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.annotation.Order;
 
 public class VertxWebConfigSupport implements ApplicationContextAware {
@@ -23,19 +24,17 @@ public class VertxWebConfigSupport implements ApplicationContextAware {
   private ApplicationContext applicationContext;
 
   @Bean
+  @Lazy
   @ConditionalOnMissingBean
   @Order()
   public Router routerBean() {
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
-    router.errorHandler(404, ctx -> {
-      ctx.response().setStatusCode(404).end("404");
-    });
-
     return router;
   }
 
   @Bean
+  @Lazy
   @ConditionalOnMissingBean
   @Order()
   public VertxHandlerBuilder vertxHandlerBuilder() {

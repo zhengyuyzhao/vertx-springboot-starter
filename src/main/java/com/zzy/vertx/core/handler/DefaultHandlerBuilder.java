@@ -111,6 +111,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
     return ctx -> {
       try {
         HandlerMethod handlerMethod = new HandlerMethod(bean, method);
+        ctx.response().putHeader("Content-Type", product);
         boolean flag = interceptorManager.preHandle(ctx, handlerMethod);
         if (flag) {
           List<Object> paramList = paramTransferManager.transfer(ctx, springParamDefines);
@@ -123,7 +124,6 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
 
           interceptorManager.postHandle(ctx, handlerMethod, result);
           if (!(ctx.response().ended() || ctx.response().closed())) {
-            ctx.response().putHeader("Content-Type", product);
             if (result == null) {
               ctx.response().end("null");
             } else {
@@ -148,6 +148,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
     return ctx -> {
       try {
         HandlerMethod handlerMethod = new HandlerMethod(bean, method);
+        ctx.response().putHeader("Content-Type", product);
         boolean flag = interceptorManager.preHandle(ctx, handlerMethod);
         if (flag) {
           List<Object> paramList = paramTransferManager.transfer(ctx, springParamDefines);

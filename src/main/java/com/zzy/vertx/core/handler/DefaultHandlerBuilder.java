@@ -7,7 +7,6 @@ import com.zzy.vertx.core.handler.param.ParamTransferManager;
 import com.zzy.vertx.core.handler.param.SpringParamDefine;
 import com.zzy.vertx.core.message.MessageConvertManager;
 import io.vertx.core.Handler;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.Json;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
@@ -111,7 +110,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
     return ctx -> {
       try {
         HandlerMethod handlerMethod = new HandlerMethod(bean, method);
-        ctx.response().putHeader("Content-Type", product);
+        setBaseResponseHeader(ctx, product);
         boolean flag = interceptorManager.preHandle(ctx, handlerMethod);
         if (flag) {
           List<Object> paramList = paramTransferManager.transfer(ctx, springParamDefines);
@@ -148,7 +147,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
     return ctx -> {
       try {
         HandlerMethod handlerMethod = new HandlerMethod(bean, method);
-        ctx.response().putHeader("Content-Type", product);
+        setBaseResponseHeader(ctx, product);
         boolean flag = interceptorManager.preHandle(ctx, handlerMethod);
         if (flag) {
           List<Object> paramList = paramTransferManager.transfer(ctx, springParamDefines);
@@ -196,12 +195,12 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
       if (httpStatus != null) {
         ctx.response().setStatusCode(httpStatus.value());
       }
-      if(result == null){
+      if (result == null) {
         ctx.response().end();
-      }else if(result instanceof String){
+      } else if (result instanceof String) {
         ctx.response().putHeader("Content-Type", PLAIN_PRODUCT);
-        ctx.response().end((String)result);
-      }else {
+        ctx.response().end((String) result);
+      } else {
         ctx.response().putHeader("Content-Type", DEFAULT_PRODUCT);
         ctx.response().end(Json.encodePrettily(result));
       }
@@ -211,6 +210,10 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
   private RequestMapping getMappingForMethod(Method method) {
     RequestMapping info = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
     return info;
+  }
+
+  private void setBaseResponseHeader(RoutingContext context, String product) {
+    context.response().putHeader("Content-Type", product);
   }
 
 }

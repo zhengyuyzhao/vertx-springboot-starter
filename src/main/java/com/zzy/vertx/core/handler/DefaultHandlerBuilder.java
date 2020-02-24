@@ -202,7 +202,7 @@ public class DefaultHandlerBuilder implements VertxHandlerBuilder {
         ctx.response().end((String) result);
       } else {
         ctx.response().putHeader("Content-Type", DEFAULT_PRODUCT);
-        ctx.response().end(Json.encodePrettily(result));
+        ctx.response().end(Json.encode(result));
       }
     };
   }

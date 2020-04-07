@@ -36,15 +36,12 @@ public class RouterIniter implements SmartLifecycle, ApplicationContextAware {
   public static final String DEFAULT_PRODUCT = MediaType.APPLICATION_JSON_UTF8_VALUE;
   public static final String DEFAULT_CONSUME = "*";
   private boolean running;
+  @Autowired
   private Router router;
   private ApplicationContext applicationContext;
 
   @Autowired
   private VertxHandlerBuilder handlerBuilder;
-
-  public RouterIniter(Router router) {
-    this.router = router;
-  }
 
   private void buildRouter(Object bean, Class cla) {
     String baseUrl = "";
@@ -158,6 +155,7 @@ public class RouterIniter implements SmartLifecycle, ApplicationContextAware {
 
   @Override
   public void start() {
+    logger.info("RouterIniter SmartLifecycle");
     running = true;
     Map<String, Object> controllers = new HashMap<>();
     controllers.putAll(this.applicationContext.getBeansWithAnnotation(Controller.class));

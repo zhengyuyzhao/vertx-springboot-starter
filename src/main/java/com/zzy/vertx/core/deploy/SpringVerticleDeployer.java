@@ -30,6 +30,7 @@ public class SpringVerticleDeployer implements SmartLifecycle {
   private Vertx vertx;
 
   public void deploy() throws ExecutionException, InterruptedException {
+    logger.info("SpringVerticleDeployer SmartLifecycle");
     vertx.registerVerticleFactory(verticleFactory);
     // Scale the verticles on cores: create 4 instances during the deployment
     DeploymentOptions options = new DeploymentOptions()

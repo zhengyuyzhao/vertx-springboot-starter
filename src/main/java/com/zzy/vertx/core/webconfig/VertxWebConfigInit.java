@@ -10,6 +10,9 @@ import com.zzy.vertx.core.message.JsonMessageConvert;
 import com.zzy.vertx.core.message.MessageConvertManager;
 import com.zzy.vertx.core.message.StringMessageConvert;
 import com.zzy.vertx.core.message.XmlMessageConvert;
+import com.zzy.vertx.core.router.RouterIniter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import java.util.Map;
 
 public class VertxWebConfigInit implements SmartLifecycle, ApplicationContextAware {
+  private static final Logger logger = LoggerFactory.getLogger(VertxWebConfigInit.class);
   private ApplicationContext applicationContext;
   @Autowired
   private VertxHandlerInterceptorManager vertxHandlerInterceptorManager;
@@ -45,6 +49,7 @@ public class VertxWebConfigInit implements SmartLifecycle, ApplicationContextAwa
 
   @Override
   public void start() {
+    logger.info("VertxWebConfigInit SmartLifecycle");
     running = true;
     Map<String, VertxHandlerInterceptor> intercepters = this.applicationContext.getBeansOfType(VertxHandlerInterceptor.class);
     for(VertxHandlerInterceptor interceptor: intercepters.values()){
